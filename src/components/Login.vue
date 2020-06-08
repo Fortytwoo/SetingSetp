@@ -72,9 +72,14 @@ export default {
       const { data: res } = await this.$http.post('/login',
         { username: this.formInfoLogin.username, password: this.formInfoLogin.psd })
       if (res.meta.code !== 200) {
-        this.$message.error(res.meta.msg)
+        this.$message({ type: 'error', message: res.meta.msg })
       } else {
-        this.$message.success(res.meta.msg)
+        window.sessionStorage.setItem('token', 'Bearer' + ' ' + res.meta.token)
+        // 后期更改API返回用户名
+        window.sessionStorage.setItem('username', res.meta.msg)
+        console.log(res.meta.token)
+        console.log(res)
+        this.$message({ type: 'success', message: res.meta.msg })
         this.$router.push('/Home')
       }
 

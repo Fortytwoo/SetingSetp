@@ -20,8 +20,8 @@
                                 <el-form-item label="旧密码" props="psd">
                                       <el-input v-model="formInfoRegist.psd" show-password></el-input>
                                 </el-form-item>
-                                <el-form-item label="新密码" props="againpsd">
-                                      <el-input v-model="formInfoRegist.psd" show-password></el-input>
+                                <el-form-item label="新密码" props="againPsd">
+                                      <el-input v-model="formInfoRegist.againpsd" show-password></el-input>
                                 </el-form-item>
                                   <el-form-item>
                                       <el-row>
@@ -46,8 +46,7 @@ export default {
       formInfoRegist: {
         username: '',
         psd: '',
-        againpsd: '',
-        eamil: ''
+        againpsd: ''
       },
       formInfoRegistRules: {
         username: [
@@ -78,10 +77,27 @@ export default {
     }
   },
   created () {
+    this.getusername()
   },
   methods: {
-    putPwdBtn () {
-
+    getusername () {
+      this.formInfoRegist.username = window.sessionStorage.getItem('username')
+    },
+    // 该函数中，新密码参数未知，待服务端更新
+    async putPwdBtn () {
+      const { data: res } = await this.$http.put('/putuserpwd', this.formInfoRegist)
+      if (res.meta.code !== 200) {
+        this.$message({
+          type: 'error',
+          message: res.meta.msg
+        })
+      } else {
+        this.$router.push('/login')
+        this.$message({
+          type: 'success',
+          message: res.meta.msg + '请重新登陆！'
+        })
+      }
     }
   },
   comments: {

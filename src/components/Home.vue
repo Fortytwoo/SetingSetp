@@ -16,17 +16,17 @@
                 </el-alert>
               </el-col>
            </el-row>
-            <el-form-item label="UserId" prop="UserId">
-          <el-input v-model="fromInfoPutSprot.UserId" learable clearable></el-input>
+            <el-form-item label="userId" prop="userId">
+          <el-input v-model="fromInfoPutSprot.userId" learable clearable></el-input>
         </el-form-item>
-        <el-form-item label="Url" prop="Url">
-          <el-input v-model="fromInfoPutSprot.Url" learable clearable></el-input>
+        <el-form-item label="url" prop="url">
+          <el-input v-model="fromInfoPutSprot.url" learable clearable></el-input>
         </el-form-item>
-            <el-form-item label="Cookie" prop="Cookie">
-          <el-input  v-model="fromInfoPutSprot.Cookie" learable clearable></el-input>
+            <el-form-item label="cookie" prop="cookie">
+          <el-input  v-model="fromInfoPutSprot.cookie" learable clearable></el-input>
         </el-form-item>
-        <el-form-item label="步数" prop="putSprot">
-          <el-input-number v-model="fromInfoPutSprot.putSprot" learable :min="1" :max="60000"></el-input-number>
+        <el-form-item label="步数" prop="Sprot">
+          <el-input-number v-model="fromInfoPutSprot.Sprot" learable :min="1" :max="60000"></el-input-number>
         </el-form-item>
         <el-row>
           <el-col :span="24" :push="2">
@@ -49,23 +49,53 @@ export default {
   data () {
     return {
       fromInfoPutSprot: {
-        UserId: '',
-        Url: '',
-        Cookie: '',
-        putSprot: 520
+        userId: '',
+        url: '',
+        cookie: '',
+        Sprot: 520
       }
     }
   },
   created () {
+    this.getSetpSet()
   },
   methods: {
+    async getSetpSet () {
+      const { data: res } = await this.$http.get('/getSetp')
+      if (res.meta.code !== 200) {
+        this.$message({ type: 'error', message: res.meta.meta })
+      } else {
+        this.$message({ type: 'success', message: '获取信息成功！' })
+        console.log(res)
+        // 给表单数据赋值
+        this.fromInfoPutSprot = {
+          userId: res.data.userId,
+          url: res.data.url,
+          cookie: res.data.cookie,
+          Sprot: res.data.Sprot
+        }
+      }
+    },
     // 退出登录
     exitlogin () {
+      window.sessionStorage.clear('token')
+      window.sessionStorage.clear('activePath')
       this.$router.push('/Login')
     },
     // 提交表单
-    postFrom () {
-
+    async postFrom () {
+      const { data: res } = await this.$http.put('/putSetp', this.fromInfoPutSprot)
+      if (res.meta.code !== 200) {
+        this.$message({
+          type: 'error',
+          message: res.meta.msg
+        })
+      } else {
+        this.$message({
+          type: 'success',
+          message: res.meta.msg
+        })
+      }
     },
     // 修改密码
     putPwd () {
