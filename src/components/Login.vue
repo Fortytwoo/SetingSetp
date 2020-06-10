@@ -10,12 +10,14 @@
                         <el-col>
                             <el-form
                             label-width="60px"
-                            v-model="formInfoLogin">
-                                <el-form-item label="账号" props="username">
-                                    <el-input v-model="formInfoLogin.username" clearable prefix-icon="iconfont icon-yonghu"></el-input>
+                            :model="loginFormInfo"
+                            ref="loginFormRef"
+                            :rules="loginFormRules">
+                                <el-form-item label="账号" prop="username">
+                                    <el-input v-model="loginFormInfo.username" clearable prefix-icon="iconfont icon-yonghu"></el-input>
                                 </el-form-item>
-                                <el-form-item label="密码" props="psd">
-                                      <el-input v-model="formInfoLogin.psd" show-password prefix-icon="iconfont icon-password"></el-input>
+                                <el-form-item label="密码" prop="psd">
+                                      <el-input v-model="loginFormInfo.psd" show-password prefix-icon="iconfont icon-password"></el-input>
                                 </el-form-item>
                                   <el-form-item>
                                       <el-row>
@@ -42,9 +44,20 @@ export default {
     return {
       waitingTime: 30,
       getvildCodetime: false,
-      formInfoLogin: {
+      loginFormInfo: {
         username: '',
         psd: ''
+      },
+      loginFormRules: {
+      //   验证用户名是否合法
+        username: [
+          { required: true, message: '请输入用户名称', trigger: 'blur' },
+          { min: 3, max: 10, message: '长度在 3 到 10 个字符', trigger: 'blur' }
+        ],
+        psd: [
+          { required: true, message: '请输入登录密码', trigger: 'blur' },
+          { min: 6, max: 15, message: '长度在 6 到 15 个字符', trigger: 'blur' }
+        ]
       }
     }
   },
@@ -68,22 +81,25 @@ export default {
         this.waitingTime = this.waitingTime - 1
       }, 1000)
     },
-    async postlogin () {
-      const { data: res } = await this.$http.post('/login',
-        { username: this.formInfoLogin.username, password: this.formInfoLogin.psd })
-      if (res.meta.code !== 200) {
-        this.$message({ type: 'error', message: res.meta.msg })
-      } else {
-        window.sessionStorage.setItem('token', 'Bearer' + ' ' + res.meta.token)
-        // 后期更改API返回用户名
-        window.sessionStorage.setItem('username', res.meta.msg)
-        console.log(res.meta.token)
+    // 登录
+    postlogin () {
+      this.$refs.loginFormRef.validate(async (valid) => {
+        if (!valid) {
+          return
+        }
+        const { data: res } = await this.$http.post('/login',
+          { username: this.loginFormInfo.username, password: this.loginFormInfo.psd })
         console.log(res)
-        this.$message({ type: 'success', message: res.meta.msg })
-        this.$router.push('/Home')
-      }
 
-      console.log(res)
+        if (res.meta.code !== 200) {
+          this.$message({ type: 'error', message: res.meta.msg })
+        } else {
+          window.sessionStorage.setItem('token', 'Bearer' + ' ' + res.meta.token)
+          window.sessionStorage.setItem('username', res.data.username)
+          this.$message({ type: 'success', message: res.meta.msg })
+          this.$router.push('/Home')
+        }
+      })
     },
     jumpRegist () {
       this.$router.push('/registered')

@@ -30,12 +30,11 @@ export default {
   methods: {
     swirpimg () {
       // 定时任务，10秒切换一次
-      setInterval(this.changeimg, 10000)
+      setInterval(this.changeimg, 15000)
     },
     // 随机设置背景片
     changeimg () {
       this.imageUrl = this.imagesUrl[this.randnum(0, this.imagesUrl.length - 1)]
-      console.log('切换一次')
     },
     // 随机生成一个中间数，用于切换图片
     randnum (minNum, maxNum) {

@@ -11,17 +11,17 @@
                         <el-col>
                             <el-form
                             label-width="70px"
-                            v-model="formInfoRegist"
+                            :model="formInfoRegist"
                             ref="formInfoRegistRef"
                             :rules="formInfoRegistRules">
-                                <el-form-item label="账号" props="username">
+                                <el-form-item label="账号" prop="username">
                                     <el-input v-model="formInfoRegist.username" id="username" disabled></el-input>
                                 </el-form-item>
-                                <el-form-item label="旧密码" props="psd">
-                                      <el-input v-model="formInfoRegist.psd" show-password></el-input>
+                                <el-form-item label="旧密码" prop="password">
+                                      <el-input v-model="formInfoRegist.password" show-password></el-input>
                                 </el-form-item>
-                                <el-form-item label="新密码" props="againPsd">
-                                      <el-input v-model="formInfoRegist.againpsd" show-password></el-input>
+                                <el-form-item label="新密码" prop="newpassword">
+                                      <el-input v-model="formInfoRegist.newpassword" show-password></el-input>
                                 </el-form-item>
                                   <el-form-item>
                                       <el-row>
@@ -45,33 +45,16 @@ export default {
     return {
       formInfoRegist: {
         username: '',
-        psd: '',
-        againpsd: ''
+        password: '',
+        newpassword: ''
       },
       formInfoRegistRules: {
-        username: [
-          {
-            require: true
-          },
-          {}
+        password: [
+          { required: true, message: '请输入旧密码', trigger: 'blur' }
         ],
-        psd: [
-          {
-            require: true
-          },
-          {}
-        ],
-        againpsd: [
-          {
-            require: true
-          },
-          {}
-        ],
-        eamil: [
-          {
-            require: true
-          },
-          {}
+        newpassword: [
+          { required: true, message: '请输入新密码', trigger: 'blur' },
+          { min: 6, max: 15, message: '长度在 6 到 15 个字符', trigger: 'blur' }
         ]
       }
     }
@@ -83,21 +66,30 @@ export default {
     getusername () {
       this.formInfoRegist.username = window.sessionStorage.getItem('username')
     },
-    // 该函数中，新密码参数未知，待服务端更新
-    async putPwdBtn () {
-      const { data: res } = await this.$http.put('/putuserpwd', this.formInfoRegist)
-      if (res.meta.code !== 200) {
-        this.$message({
-          type: 'error',
-          message: res.meta.msg
-        })
-      } else {
-        this.$router.push('/login')
-        this.$message({
-          type: 'success',
-          message: res.meta.msg + '请重新登陆！'
-        })
-      }
+    // 修改密码： 旧密码为password 新密码为 newpassword
+    putPwdBtn () {
+      this.$refs.formInfoRegistRef.validate(async (valid) => {
+        if (!valid) {
+          return
+        }
+        const { data: res } = await this.$http.put('/putuserpwd', this.formInfoRegist)
+        console.log(this.formInfoRegist)
+        if (res.meta.code !== 200) {
+          this.$message({
+            type: 'error',
+            message: res.meta.msg
+          })
+        } else {
+          window.sessionStorage.clear('token')
+          window.sessionStorage.clear('username')
+          window.sessionStorage.clear('activePath')
+          this.$router.push('/Login')
+          this.$message({
+            type: 'success',
+            message: res.meta.msg + '请重新登陆！'
+          })
+        }
+      })
     }
   },
   comments: {

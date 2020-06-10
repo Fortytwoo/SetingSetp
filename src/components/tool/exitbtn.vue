@@ -16,7 +16,7 @@ export default {
   },
   methods: {
     exit () {
-      this.$router.push('/Login')
+      this.$router.push('/Home')
     }
   },
   comments: {

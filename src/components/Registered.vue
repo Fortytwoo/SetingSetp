@@ -10,22 +10,22 @@
                         </el-col>
                         <el-col>
                             <el-form
-                            label-width="70px"
-                            v-model="formInfoRegist"
-                            ref="formInfoRegistRef"
-                            :rules="formInfoRegistRules">
-                                <el-form-item label="账号" props="username">
+                            label-width="80px"
+                            :model="formInfoRegist"
+                            :rules="rules"
+                            ref="formInfoRegist">
+                                <el-form-item label="账号" prop="username">
                                     <el-input v-model="formInfoRegist.username" clearable id="username"
                                     maxlength="12" minlength="3"></el-input>
                                 </el-form-item>
-                                <el-form-item label="密码" props="psd">
+                                <el-form-item label="密码" prop="psd">
                                       <el-input v-model="formInfoRegist.psd" show-password></el-input>
                                 </el-form-item>
-                                <el-form-item label="确认密码" props="againpsd">
+                                <el-form-item label="确认密码" prop="psdverification">
                                       <el-input v-model="formInfoRegist.psdverification" show-password></el-input>
                                 </el-form-item>
-                                <el-form-item label="邮箱" props="eamil">
-                                  <el-input v-model="formInfoRegist.eamil"></el-input>
+                                <el-form-item label="邮箱" prop="email">
+                                  <el-input v-model="formInfoRegist.email"></el-input>
                                 </el-form-item>
                                   <el-form-item>
                                       <el-row>
@@ -46,37 +46,65 @@
 
 export default {
   data () {
+    var username = (rules, value, callback) => {
+      if (value === '') {
+        return callback(new Error('请输入您的用户名'))
+      }
+      // if(value.length <)
+      callback()
+    }
+    var psd = (rules, value, callback) => {
+      if (value === '') {
+        return callback(new Error('请输入您的密码'))
+      }
+      callback()
+    }
+    var psdverification = (rules, value, callback) => {
+      if (value === '') {
+        return callback(new Error('请您再次输入密码以便确认'))
+      } else if (value !== this.formInfoRegist.psd) {
+        return callback(new Error('两次输入密码不同'))
+      }
+      callback()
+    }
+    var email = (rules, value, callback) => {
+      if (value === '') {
+        return callback(new Error('请输入您的电子邮箱'))
+      } else {
+        var pattern = /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/
+        var str = this.formInfoRegist.email
+        if (pattern.test(str)) {
+          return callback()
+        } else {
+          return callback(new Error('请输入合法邮箱'))
+        }
+      }
+    }
     return {
       formInfoRegist: {
         username: '',
         psd: '',
         psdverification: '',
-        eamil: ''
+        email: ''
       },
-      formInfoRegistRules: {
+      rules: {
         username: [
-          {
-            require: true
-          },
-          {}
+          { required: true, message: '请输入您的用户名', trigger: 'blur' },
+          { min: 3, max: 10, message: '长度在 3 到 10 个字符', trigger: 'blur' },
+          { validator: username, trigger: 'blur' }
         ],
         psd: [
-          {
-            require: true
-          },
-          {}
+          { required: true, message: '请输入您的密码', trigger: 'blur' },
+          { min: 6, max: 15, message: '长度在 6 到 15 个字符', trigger: 'blur' },
+          { validator: psd, trigger: 'blur' }
         ],
-        againpsd: [
-          {
-            require: true
-          },
-          {}
+        psdverification: [
+          { required: true, message: '请您再次输入密码以便确认', trigger: 'blur' },
+          { validator: psdverification, trigger: 'blur' }
         ],
-        eamil: [
-          {
-            require: true
-          },
-          {}
+        email: [
+          { required: true, message: '请输入您的电子邮箱', trigger: 'blur' },
+          { validator: email, trigger: 'blur' }
         ]
       }
     }
@@ -84,22 +112,32 @@ export default {
   created () {
   },
   methods: {
+    // 注册
     async registBtn () {
-      const { data: res } = await this.$http.post('/regist', {
-        username: this.formInfoRegist.username,
-        password: this.formInfoRegist.psd,
-        email: this.formInfoRegist.eamil
+      this.$refs.formInfoRegist.validate(async (valid) => {
+        if (!valid) return
+        const { data: res } = await this.$http.post('/regist', {
+          username: this.formInfoRegist.username,
+          password: this.formInfoRegist.psd,
+          email: this.formInfoRegist.email
+        })
+        console.log(res.meta.msg)
+
+        if (res.meta.code !== 200) {
+          this.$message({
+            type: 'error',
+            message: res.meta.msg
+          })
+        } else {
+          this.$message({
+            type: 'success',
+            message: res.meta.msg
+          })
+          this.$router.push('/Login')
+        }
       })
-      console.log(res)
-      if (res.meta.code !== 200) {
-        this.$message.error(res.meta.msg)
-      } else {
-        this.$message.success(res.meta.msg)
-        this.$router.push('/Home')
-      }
     }
-  },
-  comments: {
+
   }
 }
 </script>

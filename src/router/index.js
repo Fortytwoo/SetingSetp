@@ -60,16 +60,10 @@ const router = new VueRouter({
 // next代表放行(是一个函数且有返回值)
 
 router.beforeEach((to, from, next) => {
-  if (to.path === '/login' && sessionStorage.getItem('token')) {
-    return next('/home')
-  }
   if (sessionStorage.getItem('token')) {
     if (to.path === '/Login' && sessionStorage.getItem('token')) {
       return next('/home')
     }
-    // if (to.path === '/' && sessionStorage.getItem('token')) {
-    //   return next('/home')
-    // }
     next()
   } else {
   // 如果是登录页面路径，就直接next()

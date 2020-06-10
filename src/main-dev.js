@@ -8,7 +8,8 @@ import './assets/css/global.css'
 
 import axios from 'axios'
 
-axios.defaults.baseURL = 'http://49.233.20.174:3001/api/'
+axios.defaults.baseURL = 'http://49.233.20.174:3000/api/'
+// axios.defaults.baseURL = 'http://127.0.0.1:3000/api/'
 
 axios.interceptors.request.use(config => {
   // 为请求头对象，添加Token验证的 Authorization 字段

@@ -3,7 +3,7 @@
       <el-card id="loginCard">
                 </el-card>
           <el-card id="gs">
-            <el-form label-width="80px" v-model="fromInfoPutSprot">
+            <el-form label-width="80px" :model="fromInfoPutSprot" ref="fromInfoPutSprotRef" :rules="fromInfoPutSprotRules">
             <el-row>
               <el-col>
                 修改配置
@@ -26,7 +26,14 @@
           <el-input  v-model="fromInfoPutSprot.cookie" learable clearable></el-input>
         </el-form-item>
         <el-form-item label="步数" prop="Sprot">
-          <el-input-number v-model="fromInfoPutSprot.Sprot" learable :min="1" :max="60000"></el-input-number>
+          <el-row>
+            <el-col :span="12">
+              <el-input-number v-model="fromInfoPutSprot.Sprot" learable :min="1" :max="60000"></el-input-number>
+            </el-col>
+            <el-col :span="12" :push="8" id="prompt">
+              <el-link type="primary" href="https://lujingru42.top/index.php/2020/06/10/%e8%ae%b0%e5%bd%95%e4%b8%80%e6%ac%a1%e5%85%b3%e4%ba%8efiddler%e7%9a%84%e4%bd%bf%e7%94%a8%e5%ae%9e%e4%be%8b/" target="_blank">如何获得配置参数？</el-link>
+            </el-col>
+          </el-row>
         </el-form-item>
         <el-row>
           <el-col :span="24" :push="2">
@@ -53,6 +60,20 @@ export default {
         url: '',
         cookie: '',
         Sprot: 520
+      },
+      fromInfoPutSprotRules: {
+        userId: [
+          { required: true, message: '请设置userId', trigger: 'blur' }
+        ],
+        url: [
+          { required: true, message: '请设置url', trigger: 'blur' }
+        ],
+        cookie: [
+          { required: true, message: '请设置cookie', trigger: 'blur' }
+        ],
+        Sprot: [
+          { required: true, message: '请设置Sprot', trigger: 'blur' }
+        ]
       }
     }
   },
@@ -65,7 +86,7 @@ export default {
       if (res.meta.code !== 200) {
         this.$message({ type: 'error', message: res.meta.meta })
       } else {
-        this.$message({ type: 'success', message: '获取信息成功！' })
+        this.$message({ type: 'success', message: '获取配置信息成功' })
         console.log(res)
         // 给表单数据赋值
         this.fromInfoPutSprot = {
@@ -83,19 +104,24 @@ export default {
       this.$router.push('/Login')
     },
     // 提交表单
-    async postFrom () {
-      const { data: res } = await this.$http.put('/putSetp', this.fromInfoPutSprot)
-      if (res.meta.code !== 200) {
-        this.$message({
-          type: 'error',
-          message: res.meta.msg
-        })
-      } else {
-        this.$message({
-          type: 'success',
-          message: res.meta.msg
-        })
-      }
+    postFrom () {
+      this.$refs.fromInfoPutSprotRef.validate(async (valid) => {
+        if (!valid) {
+          return
+        }
+        const { data: res } = await this.$http.put('/putSetp', this.fromInfoPutSprot)
+        if (res.meta.code !== 200) {
+          this.$message({
+            type: 'error',
+            message: res.meta.msg
+          })
+        } else {
+          this.$message({
+            type: 'success',
+            message: res.meta.msg
+          })
+        }
+      })
     },
     // 修改密码
     putPwd () {
@@ -155,5 +181,8 @@ export default {
 .el-alert{
   width: 80%;
   margin-bottom: 8px;
+}
+#prompt{
+  margin-top: -30px;
 }
 </style>
